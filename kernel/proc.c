@@ -688,3 +688,10 @@ procdump(void)
     printf("\n");
   }
 }
+uint64 sys_getprocinfo(void) {
+  struct proc *p = myproc();
+  printf("Process name: %s\n", p->name);
+  printf("Process PID: %d\n", p->pid);
+  printf("Process state: %d\n", p->state);
+  return 0;
+}
