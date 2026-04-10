@@ -24,3 +24,4 @@
 #define SYS_shmget      23
 #define SYS_shmattach   24
 #define SYS_shmdetach   25
+#define SYS_fork_with_priority 26

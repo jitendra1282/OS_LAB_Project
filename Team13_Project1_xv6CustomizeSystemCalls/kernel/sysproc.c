@@ -107,3 +107,21 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+uint64 sys_fork_with_priority(void) {
+  int priority;
+
+  argint(0, &priority);
+
+
+  int pid = sys_fork();
+
+  if(pid < 0)
+    return -1;
+
+  if(pid == 0){
+    struct proc *p = myproc();
+    p->priority = priority;
+  }
+
+  return pid;
+}

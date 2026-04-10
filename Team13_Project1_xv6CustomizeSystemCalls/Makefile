@@ -148,13 +148,13 @@ UPROGS=\
 	$U/_testproc\
 	$U/_dorphan\
 	$U/_testshm\
-
+	$U/_test_priority
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
 
 -include kernel/*.d user/*.d
 
-clean: 
+clean:
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
 	*/*.o */*.d */*.asm */*.sym \
 	$K/kernel fs.img \
