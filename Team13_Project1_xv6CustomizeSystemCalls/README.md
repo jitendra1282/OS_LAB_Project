@@ -16,7 +16,7 @@
 |--------|------|--------------|
 | 1 | Nandipati Jitendra Krishna Sri Sai | 24JE0660 |
 | 2 | MD.salman | 24JE0657 |
-| 3 | Member 3 Name | — |
+| 3 | Neelamber Mishra | 24JE0663 |
 | 4 | Member 4 Name | — |
 | 5 | Member 5 Name | — |
 | 6 | Member 6 Name | — |
