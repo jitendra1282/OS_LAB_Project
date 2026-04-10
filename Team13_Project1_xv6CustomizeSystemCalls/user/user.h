@@ -25,9 +25,13 @@ char* sys_sbrk(int,int);
 int pause(int);
 int uptime(void);
 int getprocinfo(void);
-int shmget(int key, int size);
-void* shmattach(int shmid);
-int shmdetach(int shmid);
+int shmget(int, int);
+void* shmattach(int);
+int shmdetach(int);
+int fork_with_priority(int);
+
+struct pstat;
+int getpinfo(struct pstat*);
 // ulib.c
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);

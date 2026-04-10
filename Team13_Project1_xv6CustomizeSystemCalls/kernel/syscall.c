@@ -106,6 +106,7 @@ extern uint64 sys_shmget(void);
 extern uint64 sys_shmattach(void);
 extern uint64 sys_shmdetach(void);
 extern uint64 sys_fork_with_priority(void);
+extern uint64 sys_getpinfo(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -136,6 +137,7 @@ static uint64 (*syscalls[])(void) = {
 [SYS_shmattach] sys_shmattach,
 [SYS_shmdetach] sys_shmdetach,
 [SYS_fork_with_priority] sys_fork_with_priority,
+[SYS_getpinfo]  sys_getpinfo,
 };
 
 void

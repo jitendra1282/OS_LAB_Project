@@ -6,6 +6,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "vm.h"
+#include "pstat.h"
 
 uint64
 sys_exit(void)
@@ -124,4 +125,30 @@ uint64 sys_fork_with_priority(void) {
   }
 
   return pid;
+}
+
+extern struct proc proc[];
+
+uint64 sys_getpinfo(void) {
+  uint64 paddr;
+  argaddr(0, &paddr);
+
+  struct pstat tmp;
+  struct proc *p;
+  int i = 0;
+
+  for(p = proc; p < &proc[NPROC]; p++){
+    tmp.pid[i] = p->pid;
+    tmp.state[i] = p->state;
+    tmp.priority[i] = p->priority;
+    tmp.ticks[i] = p->ticks;
+    tmp.inuse[i] = (p->state != UNUSED);
+    i++;
+  }
+
+  struct proc *myp = myproc();
+  if(copyout(myp->pagetable, paddr, (char *)&tmp, sizeof(tmp)) < 0)
+    return -1;
+
+  return 0;
 }

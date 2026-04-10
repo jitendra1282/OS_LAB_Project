@@ -885,6 +885,123 @@ Return pid  →  back to user space
 
 ---
 
+## System Call 4 — `getpinfo` (Member 3)
+
+### 📌 Overview
+
+This system call provides a detailed snapshot of all active processes in the xv6 operating system.
+
+Unlike basic process inspection, `getpinfo()` exposes kernel-level scheduling data to user space, enabling monitoring and analysis of process behavior. This is essential for implementing and evaluating advanced scheduling algorithms.
+
+### 🎯 Objective
+
+- Provide visibility into the process table.
+- Enable analysis of CPU scheduling behavior.
+- Support debugging and performance evaluation.
+- Bridge kernel internals with user programs.
+
+### ⚙️ System Call Definition
+
+```c
+int getpinfo(struct pstat *ps);
+```
+
+### 🧠 Functionality
+
+- Copies process information from kernel to user space using `copyout()`.
+- Fills a structure containing:
+  - Process IDs
+  - Process states
+  - Priority values
+  - CPU usage ticks
+  - Whether a slot is in use
+- Returns: `0` (success) or `-1` (failure).
+
+### 📂 Files Modified
+
+| File | Description |
+|------|-------------|
+| `kernel/proc.h` | Added `int ticks;` for tracking CPU usage |
+| `kernel/proc.c` | Initialized and updated CPU tick counters |
+| `kernel/sysproc.c` | Implemented syscall logic securely using `copyout()` |
+| `kernel/syscall.h` | Added syscall number `SYS_getpinfo` |
+| `kernel/syscall.c` | Registered syscall in dispatch table |
+| `user/user.h` | Declared function and struct mapping |
+| `user/usys.pl` | Added perl entry script for Trap generation |
+| `kernel/pstat.h` | Defined the `pstat` datastructure |
+| `user/test_pinfo.c` | Verification Program |
+| `Makefile` | Compiled new test program |
+
+### 🧩 Data Structure
+
+```c
+#define NPROC 64
+
+struct pstat {
+  int pid[NPROC];
+  int state[NPROC];
+  int priority[NPROC];
+  int ticks[NPROC];
+  int inuse[NPROC];
+};
+```
+
+### 🧪 Test Program `user/test_pinfo.c`
+
+```c
+#include "kernel/types.h"
+#include "user/user.h"
+#include "kernel/pstat.h"
+
+int main() {
+  struct pstat ps;
+
+  getpinfo(&ps);
+
+  for(int i = 0; i < NPROC; i++){
+    if(ps.inuse[i]){
+      printf("PID: %d | State: %d | Priority: %d | Ticks: %d\n",
+        ps.pid[i],
+        ps.state[i],
+        ps.priority[i],
+        ps.ticks[i]);
+    }
+  }
+
+  exit(0);
+}
+```
+
+### ▶️ How to Run & Sample Output
+
+```bash
+$ test_pinfo
+PID: 1 | State: 2 | Priority: 60 | Ticks: 35
+PID: 2 | State: 2 | Priority: 60 | Ticks: 11
+PID: 3 | State: 4 | Priority: 60 | Ticks: 5
+```
+
+### 🔄 System Call Flow
+
+```text
+User Program
+   ↓
+user.h declaration
+   ↓
+usys.pl → ecall
+   ↓
+Kernel syscall dispatcher
+   ↓
+sys_getpinfo()
+   ↓
+Reads process table
+   ↓
+Copies data to user space via copyout()
+```
+
+
+---
+
 ## How to Add More System Calls (For Teammates)
 
 Every system call in xv6 follows the same 7-step checklist. Assign your syscall number from the list below.
@@ -897,7 +1014,7 @@ Every system call in xv6 follows the same 7-step checklist. Assign your syscall 
 | 1 (Jitendra) | `shmattach` | 24 |
 | 1 (Jitendra) | `shmdetach` | 25 |
 | **Member 2** (MD.salman) | `fork_with_priority` | **26** |
-| **Member 3** | your syscall | **27** |
+| **Member 3** | `getpinfo` | **27** |
 | **Member 4** | your syscall | **28** |
 | **Member 5** | your syscall | **29** |
 | **Member 6** | your syscall | **30** |
