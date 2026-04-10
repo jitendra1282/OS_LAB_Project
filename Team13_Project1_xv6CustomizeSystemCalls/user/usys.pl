@@ -43,3 +43,6 @@ entry("sbrk");
 entry("pause");
 entry("uptime");
 entry("getprocinfo");
+entry("shmget");
+entry("shmattach");
+entry("shmdetach");
