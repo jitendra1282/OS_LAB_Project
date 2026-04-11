@@ -7,6 +7,7 @@ SRCS = thread_pool.c \
        logger.c \
        rwlock_manager.c \
        file_rw.c \
+       file_ops.c \
        main.c
 
 OBJS   = $(SRCS:.c=.o)
