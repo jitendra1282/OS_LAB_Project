@@ -1160,7 +1160,7 @@ then after
 
 ---
 
-**'Output'**
+**`Output`**
 ```
 Child running...
 Child running...
@@ -1183,9 +1183,9 @@ Every system call in xv6 follows the same 7-step checklist. Assign your syscall 
 | 1 (Jitendra) | `shmget` | 23 |
 | 1 (Jitendra) | `shmattach` | 24 |
 | 1 (Jitendra) | `shmdetach` | 25 |
-| **Member 2** (MD.salman) | `fork_with_priority` | **26** |
-| **Member 3** | `getpinfo` | **27** |
-| **Member 4** | 'kill' | **6** |
+| 2 (MD.salman) | `fork_with_priority` | **26** |
+| 3 (Neelamber) | `getpinfo` | **27** |
+| 4 (Nithya) | `kill` | **6** |
 | **Member 5** | your syscall | **29** |
 | **Member 6** | your syscall | **30** |
 
