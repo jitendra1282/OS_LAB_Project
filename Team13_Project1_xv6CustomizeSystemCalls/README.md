@@ -1018,7 +1018,9 @@ The original kill() system call works by setting flag in the process structure.
 
 
 
-Code (kernel/proc.c) :
+**Code**
+
+**`(kernel/proc.c)``** :
 ```c
 p->killed = 1;
 
@@ -1070,25 +1072,29 @@ sys_kill() → kkill()
 
 ### Modifications
 1.Process Structure Modification
+
 **`kernel/proc.h`**
 ```c
 int signal_pending;   // whether signal exists
 int signal_type;      // type of signal
 ```
 2.Initiialization in allocproc()
+
 **`kernel/proc.c`**
 ```c
 p->signal_pending = 0;
 p->signal_type = 0;
 ```
 3.Modification kill implementation
+
 **`kernel/proc.c`** ---->  `kkill()`
 ```c
 p->signal_pending = 1;   // signal exists
 p->signal_type = 9;      // SIGKILL
 p->killed = 1;
 ```
-4.Implementation in trap.c
+4.Implementation in trap.c 
+
 **`kernel/trap.c`**
 ```c
 if(p && p->signal_pending){
