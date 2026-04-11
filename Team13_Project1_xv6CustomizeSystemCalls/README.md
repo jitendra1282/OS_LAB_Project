@@ -17,7 +17,7 @@
 | 1 | Nandipati Jitendra Krishna Sri Sai | 24JE0660 |
 | 2 | MD.salman | 24JE0657 |
 | 3 | Neelamber Mishra | 24JE0663 |
-| 4 | Member 4 Name | — |
+| 4 | N.Nithya Harshini | 24JE0662 |
 | 5 | Member 5 Name | — |
 | 6 | Member 6 Name | — |
 
@@ -1002,6 +1002,152 @@ Copies data to user space via copyout()
 
 ---
 
+
+## System Call 5 - Modified 'kill' with Signal support(Member 3 - Nithya Harshini)
+
+### Purpose:
+The 'Kill()' system call is modified to support signal-based process termination instead of directly killing the process.This demonstrates:
+- Extending an existing system call in xv6
+- Introducing a basic signal implementation
+- Understanding  process lifecycle and trap handling
+- Interaction between proc structure and kernel execution
+
+### Original Behaviour (before Modification)
+The original kill() system call works by setting flag in the process structure.
+Code (kernel/proc.c) :
+p->killed = 1;
+
+if(p->state == SLEEPING){
+  p->state = RUNNABLE;
+}
+
+### Original Execution Flow 
+...
+kill(pid)
+        │
+        │  system call
+        ↓
+sys_kill() → kkill()
+        │
+        │  sets flag
+        ↓
+p->killed = 1
+        │
+        ↓
+usertrap()
+        │
+        │  checks flag
+        ↓
+if(killed(p))
+        │
+        ↓
+exit()
+### Limitation
+- Only supports direct termination
+- No support for multiple signal types
+- Cannot extend behaviou like pause/resume
+
+### Files modified
+
+| File | What Changed |
+|-------| ------------------------|
+| 'kernel/proc.h' | Declared signal_pending and signal_type |
+| 'kernel/proc.c' | Initialized signal_pending and signal_type and also modified kkill() |
+| 'kernel/trap.c' | Added signal handling logic |
+| 'user/test_kill.c' | New test program added to user folder |
+| 'Makefile' | Added $U/_test_kill |
+
+### Modifications
+1.Process Structure Modification
+**'kernel/proc.h'**
+int signal_pending;   // whether signal exists
+int signal_type;      // type of signal
+
+2.Initiialization in allocproc()
+**'kernel/proc.c'**
+p->signal_pending = 0;
+p->signal_type = 0;
+
+3.Modification kill implementation
+**'kernel/proc.c'** ----  kkill()
+p->signal_pending = 1;   // signal exists
+p->signal_type = 9;      // SIGKILL
+p->killed = 1;
+
+4.Implementation in trap.c
+**'kernel/trap.c'**
+if(p && p->signal_pending){
+  if(p->signal_type == 9){
+    printf("Process %d killed by signal\n", p->pid);
+    p->signal_pending = 0;
+    kexit(-1);
+  }
+}
+
+### Execution flow (After Modification)
+
+kill(pid)
+        │
+        │  system call
+        ↓
+sys_kill() → kkill()
+        │
+        │  set signal
+        ↓
+signal_pending = 1
+signal_type = 9
+        │
+        ↓
+usertrap()
+        │
+        │  check signal
+        ↓
+if(signal_pending)
+        │
+        ↓
+process terminated using kexit()
+
+### User Test program
+**'user/test_kill.c'**
+#include "kernel/types.h"
+#include "user/user.h"
+
+int main() {
+  int pid = fork();
+
+  if(pid == 0){
+    // child process
+    while(1){
+      printf("Child running...\n");
+    }
+  } else {
+    // parent process
+    for(int i = 0; i < 500000000; i++);
+    // delay as sleep is not defined user 
+    printf("Parent sending kill signal\n");
+    kill(pid);
+    wait(0);
+  }
+
+  exit(0);
+}
+
+### How to Run
+make clean
+make qemu
+
+then after
+$ test_kill
+
+**'Output'**
+Child running...
+Child running...
+Parent sending kill signal
+Process X killed by signal
+
+### Conclusion
+This modification enhances the kill() system call by introducing signal-based handling. It improves flexibility and brings xv6 closer to real-world operating systems where signals are used for process management.
+
 ## How to Add More System Calls (For Teammates)
 
 Every system call in xv6 follows the same 7-step checklist. Assign your syscall number from the list below.
@@ -1015,7 +1161,7 @@ Every system call in xv6 follows the same 7-step checklist. Assign your syscall 
 | 1 (Jitendra) | `shmdetach` | 25 |
 | **Member 2** (MD.salman) | `fork_with_priority` | **26** |
 | **Member 3** | `getpinfo` | **27** |
-| **Member 4** | your syscall | **28** |
+| **Member 4** | 'kill' | **6** |
 | **Member 5** | your syscall | **29** |
 | **Member 6** | your syscall | **30** |
 
