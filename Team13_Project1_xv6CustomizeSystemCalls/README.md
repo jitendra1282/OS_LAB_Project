@@ -1181,6 +1181,125 @@ Process X killed by signal
 This modification enhances the kill() system call by introducing signal-based handling. It improves flexibility and brings xv6 closer to real-world operating systems where signals are used for process management.
 
 ---
+# System Call 6 - Syscall Tracing with Bitmask Support  
+**(Member 4 - Neelamber Mishra)**
+
+## Purpose
+The `trace()` system call is implemented to monitor and log the execution of other system calls. This helps in debugging and understanding process behavior by demonstrating:
+
+- How to pass arguments from user-space to the kernel using `argint()`.
+- Modifying the core `syscall()` dispatcher to intercept execution.
+- Implementing inheritance of process attributes during `fork()`.
+- Using bitmasking logic to filter specific kernel events.
+
+## Original Behaviour (Before Implementation)
+In standard xv6, system calls execute silently in the kernel. There is no built-in way to see which calls a program makes without using a debugger like GDB.
+
+## Execution Flow (Implementation Logic)
+
+```mermaid
+flowchart TD
+    A["trace(mask)"] --> B[system call]
+    B --> C["sys_trace()"]
+    C --> D[sets mask in current process]
+    D --> E["p->trace_mask = mask"]
+    E --> F["(Later) Any Syscall"]
+    F --> G["syscall() handler"]
+    G --> H["checks (1 << num) & p->trace_mask"]
+    I["printf('%d: syscall %s -> %d')"]
+    H --> I
+```
+
+## Limitations
+- No way to track system call activity per process.
+- Difficult to debug file descriptor leaks or unexpected forks in user programs.
+- Parent processes cannot monitor the syscall patterns of their children.
+
+## Files Modified
+
+| File                | What Changed |
+|---------------------|--------------|
+| `kernel/proc.h`     | Added `trace_mask` to `struct proc` |
+| `kernel/proc.c`     | Initialized mask in `allocproc()` and handled inheritance in `fork()` |
+| `kernel/syscall.h`  | Defined `SYS_trace` (22) |
+| `kernel/syscall.c`  | Added syscall names array and logging logic in `syscall()` |
+| `kernel/sysproc.c`  | Implemented the `sys_trace()` kernel function |
+| `user/user.h`       | Added user-space prototype for `trace()` |
+| `user/trace.c`      | Created utility to run commands with tracing enabled |
+
+## Modifications
+
+### 1. Process Structure Modification
+**`kernel/proc.h`**
+```c
+int trace_mask;    // Bitmask identifying which syscalls to trace
+```
+
+### 2. Inheritance in `fork()`
+**`kernel/proc.c`**
+```c
+// Inside fork()
+np->trace_mask = p->trace_mask; // Child inherits the parent's mask
+```
+
+### 3. Tracing Logic in Dispatcher
+**`kernel/syscall.c`**
+```c
+// Inside syscall()
+p->trapframe->a0 = syscalls[num](); // Execute syscall
+
+if((1 << num) & p->trace_mask) {
+    printf("%d: syscall %s -> %d\n", p->pid, syscall_names[num], p->trapframe->a0);
+}
+```
+
+### 4. User Test Program
+**`user/trace.c`**
+```c
+#include "kernel/types.h"
+#include "user/user.h"
+
+int main(int argc, char *argv[]) {
+  if(argc < 3){
+    printf("Usage: trace mask command [args]\n");
+    exit(1);
+  }
+  if (trace(atoi(argv[1])) < 0) {
+    printf("trace failed\n");
+    exit(1);
+  }
+  exec(argv[2], &argv[2]);
+  exit(0);
+}
+```
+
+## How to Run
+```bash
+make clean
+make qemu
+```
+
+**Example:** To trace read calls (bit 5 = 32) for the grep command:
+```bash
+$ trace 32 sh
+$ echo hello
+```
+
+**Sample Output:**
+```
+5: syscall read -> 1
+5: syscall read -> 1
+5: syscall read -> 1
+5: syscall read -> 1
+5: syscall read -> 1
+5: syscall read -> 1
+5: syscall read -> 1
+5: syscall read -> 1
+5: syscall read -> 1
+5: syscall read -> 1
+5: syscall read -> 1
+```
+---
 
 ## How to Add More System Calls (For Teammates)
 
