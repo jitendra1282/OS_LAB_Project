@@ -1020,7 +1020,7 @@ The original kill() system call works by setting flag in the process structure.
 
 **Code**
 
-**`(kernel/proc.c)``** :
+**`(kernel/proc.c)`** :
 ```c
 p->killed = 1;
 
@@ -1058,7 +1058,7 @@ sys_kill() → kkill()
 ### Limitation
 - Only supports direct termination
 - No support for multiple signal types
-- Cannot extend behaviou like pause/resume
+- Cannot extend behaviour like pause/resume
 
 ### Files modified
 
