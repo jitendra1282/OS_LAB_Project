@@ -1014,16 +1014,20 @@ The 'Kill()' system call is modified to support signal-based process termination
 
 ### Original Behaviour (before Modification)
 The original kill() system call works by setting flag in the process structure.
+...
 Code (kernel/proc.c) :
+```c
 p->killed = 1;
 
 if(p->state == SLEEPING){
   p->state = RUNNABLE;
 }
+```
+--- 
 
 ### Original Execution Flow 
-...
-kill(pid)
+```
+     kill(pid)
         │
         │  system call
         ↓
@@ -1031,17 +1035,22 @@ sys_kill() → kkill()
         │
         │  sets flag
         ↓
-p->killed = 1
+  p->killed = 1
         │
         ↓
-usertrap()
+    usertrap()
         │
         │  checks flag
         ↓
-if(killed(p))
+  if(killed(p))
         │
         ↓
-exit()
+     exit()
+```
+
+---
+
+
 ### Limitation
 - Only supports direct termination
 - No support for multiple signal types
@@ -1051,31 +1060,35 @@ exit()
 
 | File | What Changed |
 |-------| ------------------------|
-| 'kernel/proc.h' | Declared signal_pending and signal_type |
-| 'kernel/proc.c' | Initialized signal_pending and signal_type and also modified kkill() |
-| 'kernel/trap.c' | Added signal handling logic |
-| 'user/test_kill.c' | New test program added to user folder |
-| 'Makefile' | Added $U/_test_kill |
+| `kernel/proc.h` | Declared signal_pending and signal_type |
+| `kernel/proc.c` | Initialized signal_pending and signal_type and also modified kkill() |
+| `kernel/trap.c` | Added signal handling logic |
+| `user/test_kill.c` | New test program added to user folder |
+| `Makefile` | Added $U/_test_kill |
 
 ### Modifications
 1.Process Structure Modification
-**'kernel/proc.h'**
+**`kernel/proc.h`**
+```c
 int signal_pending;   // whether signal exists
 int signal_type;      // type of signal
-
+```
 2.Initiialization in allocproc()
-**'kernel/proc.c'**
+**`kernel/proc.c`**
+```c
 p->signal_pending = 0;
 p->signal_type = 0;
-
+```
 3.Modification kill implementation
-**'kernel/proc.c'** ----  kkill()
+**`kernel/proc.c`** ---->  `kkill()`
+```c
 p->signal_pending = 1;   // signal exists
 p->signal_type = 9;      // SIGKILL
 p->killed = 1;
-
+```
 4.Implementation in trap.c
-**'kernel/trap.c'**
+**`kernel/trap.c`**
+```c
 if(p && p->signal_pending){
   if(p->signal_type == 9){
     printf("Process %d killed by signal\n", p->pid);
@@ -1083,10 +1096,11 @@ if(p && p->signal_pending){
     kexit(-1);
   }
 }
+```
 
 ### Execution flow (After Modification)
-
-kill(pid)
+```
+   kill(pid)
         │
         │  system call
         ↓
@@ -1094,11 +1108,11 @@ sys_kill() → kkill()
         │
         │  set signal
         ↓
-signal_pending = 1
-signal_type = 9
+  signal_pending = 1
+  signal_type = 9
         │
         ↓
-usertrap()
+    usertrap()
         │
         │  check signal
         ↓
@@ -1106,9 +1120,12 @@ if(signal_pending)
         │
         ↓
 process terminated using kexit()
+```
+---
 
 ### User Test program
-**'user/test_kill.c'**
+**`user/test_kill.c`**
+```c
 #include "kernel/types.h"
 #include "user/user.h"
 
@@ -1131,19 +1148,23 @@ int main() {
 
   exit(0);
 }
+```
 
 ### How to Run
+```
 make clean
 make qemu
-
+```
 then after
-$ test_kill
+`$` `test_kill`
+---
 
 **'Output'**
 Child running...
 Child running...
 Parent sending kill signal
 Process X killed by signal
+---
 
 ### Conclusion
 This modification enhances the kill() system call by introducing signal-based handling. It improves flexibility and brings xv6 closer to real-world operating systems where signals are used for process management.
