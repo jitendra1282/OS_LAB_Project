@@ -29,6 +29,7 @@ int shmget(int, int);
 void* shmattach(int);
 int shmdetach(int);
 int fork_with_priority(int);
+int trace(int);
 
 struct pstat;
 int getpinfo(struct pstat*);
@@ -55,4 +56,5 @@ void printf(const char*, ...) __attribute__ ((format (printf, 1, 2)));
 void* malloc(uint);
 void free(void*);
 int fork_with_priority(int);
+
 

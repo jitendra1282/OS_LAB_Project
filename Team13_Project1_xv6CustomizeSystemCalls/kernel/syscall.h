@@ -26,3 +26,4 @@
 #define SYS_shmdetach   25
 #define SYS_fork_with_priority 26
 #define SYS_getpinfo    27
+#define SYS_trace       28

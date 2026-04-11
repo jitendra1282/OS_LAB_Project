@@ -48,3 +48,4 @@ entry("shmattach");
 entry("shmdetach");
 entry("fork_with_priority");
 entry("getpinfo");
+entry("trace");

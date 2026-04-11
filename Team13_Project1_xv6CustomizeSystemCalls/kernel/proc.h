@@ -93,6 +93,7 @@ struct proc {
   int pid;                     // Process ID
   int priority ;
   int ticks;                   // CPU usage ticks for getpinfo
+  int trace_mask;              // Syscall trace mask for sys_trace
 
   // wait_lock must be held when using this:
   struct proc *parent;         // Parent process

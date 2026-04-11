@@ -152,3 +152,15 @@ uint64 sys_getpinfo(void) {
 
   return 0;
 }
+
+// sys_trace: set the trace mask for the current process
+// Argument: a bitmask where bit N corresponds to syscall N
+// Returns: 0 on success
+uint64
+sys_trace(void)
+{
+  int mask;
+  argint(0, &mask);
+  myproc()->trace_mask = mask;
+  return 0;
+}
