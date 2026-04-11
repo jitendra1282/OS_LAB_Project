@@ -1013,8 +1013,11 @@ The 'Kill()' system call is modified to support signal-based process termination
 - Interaction between proc structure and kernel execution
 
 ### Original Behaviour (before Modification)
+
 The original kill() system call works by setting flag in the process structure.
----
+
+
+
 Code (kernel/proc.c) :
 ```c
 p->killed = 1;
