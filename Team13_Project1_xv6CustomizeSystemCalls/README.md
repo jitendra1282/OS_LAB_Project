@@ -1014,7 +1014,7 @@ The 'Kill()' system call is modified to support signal-based process termination
 
 ### Original Behaviour (before Modification)
 The original kill() system call works by setting flag in the process structure.
-...
+---
 Code (kernel/proc.c) :
 ```c
 p->killed = 1;
@@ -1157,13 +1157,16 @@ make qemu
 ```
 then after
 `$` `test_kill`
+
 ---
 
 **'Output'**
+```
 Child running...
 Child running...
 Parent sending kill signal
 Process X killed by signal
+```
 ---
 
 ### Conclusion
