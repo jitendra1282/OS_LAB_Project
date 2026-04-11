@@ -41,8 +41,8 @@ This project implements a **Multithreaded File Management System** in C on Linux
 | 2 | Exclusive File Writing | `file_rw.c` |
 | 3 | File Deletion | `file_rw.c` |
 | 4 | File Renaming | `file_rw.c` |
-| 5 | File Copying | *(planned)* |
-| 6 | File Metadata Display | *(planned)* |
+| 5 | File Copying | `file_meta.c` |
+| 6 | File Metadata Display | `file_meta.c` |
 | 7 | Error Handling | all modules |
 | 8 | Logging Operations | `logger.c` |
 | 9 | Compression/Decompression | *(planned)* |
@@ -57,11 +57,13 @@ Team13_Project2_MultithreadedFileSystem/
 ├── file_rw.c          ← Core Read/Write module — implementation (KEY FILE)
 ├── rwlock_manager.h   ← Global rwlock wrapper — header
 ├── rwlock_manager.c   ← Global rwlock wrapper — implementation
+├── file_meta.h        ← File metadata and copy operations — header
+├── file_meta.c        ← File metadata and copy operations — implementation
 ├── logger.h           ← Logging subsystem — header
 ├── logger.c           ← Logging subsystem — implementation
 ├── thread_pool.h      ← Thread pool — header
 ├── thread_pool.c      ← Thread pool — implementation
-├── main.c             ← Demo driver (5 phases)
+├── main.c             ← Demo driver (6 phases)
 ├── Makefile           ← Build system
 └── ops.log            ← Auto-generated execution log (timestamped)
 ```

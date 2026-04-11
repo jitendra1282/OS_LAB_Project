@@ -21,6 +21,9 @@
  *   PHASE 4 — RENAME & DELETE
  *     Shows file operations under exclusive write locks.
  *
+ *   PHASE 5 — METADATA DISPLAY AND FILE COPY
+ *     Demonstrates metadata display and threaded file copying.
+ *
  * All activity is logged to ops.log with timestamps.
  */
 
@@ -33,6 +36,7 @@
 #include "file_rw.h"
 #include "logger.h"
 #include "thread_pool.h"
+#include "file_meta.h"
 
 /* ── shared state ───────────────────────────────────────────── */
 #define TEST_FILE   "test_shared.txt"
@@ -225,6 +229,25 @@ int main(void)
     if (file_rw_delete(del_fid, 300) == 0) {
         printf("    '%s' deleted under wrlock.\n\n", RENAME_FILE);
     }
+
+    /* ════════════════════════════════════════════════════════
+     * PHASE 6 — METADATA DISPLAY AND FILE COPY
+     * ════════════════════════════════════════════════════════ */
+    printf("\n─── PHASE 6: Metadata Display and File Copy ────────\n");
+    log_operation("====== PHASE 6: Metadata and Copy ======");
+
+    // Display metadata for the test file
+    display_metadata(TEST_FILE);
+
+    // Submit copy task to thread pool
+    copy_args_t *copy_args = malloc(sizeof(copy_args_t));
+    copy_args->source = TEST_FILE;
+    copy_args->dest = "test_copied.txt";
+    thread_pool_submit(pool, copy_file_task, copy_args);
+
+    // Wait a bit for the copy to complete
+    sleep(1);
+    printf("    File copy task submitted to thread pool.\n");
 
     /* ── Shutdown ───────────────────────────────────────────── */
     thread_pool_shutdown(pool);

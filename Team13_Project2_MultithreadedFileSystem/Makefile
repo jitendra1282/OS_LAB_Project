@@ -8,9 +8,11 @@ SRCS = thread_pool.c \
        rwlock_manager.c \
        file_rw.c \
        file_ops.c \
+       file_meta.c \
        main.c
 
 OBJS   = $(SRCS:.c=.o)
+DEPFILES = $(SRCS:.c=.d)
 TARGET = fs_sim
 
 .PHONY: all clean run
@@ -25,6 +27,13 @@ $(TARGET): $(OBJS)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# Generate dependency files
+%.d: %.c
+	$(CC) -MM -MT '$*.o $*.d' $< > $@
+
+# Include dependency files
+-include $(DEPFILES)
+
 # Run the demo
 run: all
 	@rm -f ops.log
@@ -35,4 +44,4 @@ run: all
 
 # Clean build artifacts and generated files
 clean:
-	rm -f $(OBJS) $(TARGET) ops.log test_shared.txt test_renamed.txt *.o
+	rm -f $(OBJS) $(TARGET) $(DEPFILES) ops.log test_shared.txt test_renamed.txt
