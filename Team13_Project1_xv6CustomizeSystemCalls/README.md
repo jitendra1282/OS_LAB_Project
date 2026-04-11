@@ -1023,7 +1023,7 @@ if(p->state == SLEEPING){
   p->state = RUNNABLE;
 }
 ```
---- 
+ 
 
 ### Original Execution Flow 
 ```
@@ -1048,7 +1048,6 @@ sys_kill() → kkill()
      exit()
 ```
 
----
 
 
 ### Limitation
@@ -1121,7 +1120,7 @@ if(signal_pending)
         ↓
 process terminated using kexit()
 ```
----
+
 
 ### User Test program
 **`user/test_kill.c`**
@@ -1158,7 +1157,7 @@ make qemu
 then after
 `$` `test_kill`
 
----
+
 
 **`Output`**
 ```
@@ -1167,10 +1166,12 @@ Child running...
 Parent sending kill signal
 Process X killed by signal
 ```
----
+
 
 ### Conclusion
 This modification enhances the kill() system call by introducing signal-based handling. It improves flexibility and brings xv6 closer to real-world operating systems where signals are used for process management.
+
+---
 
 ## How to Add More System Calls (For Teammates)
 
