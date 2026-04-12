@@ -1371,6 +1371,288 @@ $U/_test_yourname \
 
 ---
 
+
+
+## System Call 7  - **`signal`** (Memeber 3 - Nithya Harshini)
+
+### Purpose :
+
+**`signal(pid, type)`** is a custom system call that allows a process to send signals to another process. It extends xv6’s process control by introducing signal-based communication, similar to real-world operating systems.
+
+This system call demonstrates:
+- Inter-process communication using signals
+- Kernel-level signal handling via trap.c
+- Process state control (pause, resume, terminate)
+
+### Signal Types :
+
+| Signal Type | Meaning |
+| ----------- | ------- |
+| **`9`** | kill process (terminate immediately) |
+| **`10`** | Pause process (temporarily stop execution) |
+| **`12`** | Resume process (continue execution) |
+
+
+### Sys Call Number 
+
+**`kernel/syscall.h`**
+
+```
+#define SYS_signal 29
+```
+
+### Files Modified
+
+| File | Description |
+| ---- | ----------- |
+| **`kernel/proc.h`** | Added signal fields and ksignal() declaration |
+| **`kernel/proc.c`** | Implemented ksignal() and initialized signal variables |
+| **`kernel/sysproc.c`** | Added sys_signal() handler |
+| **`kernel/syscall.h`** | Assigned syscall number |
+| **`kernel/syscall.c`** | Added syscall mapping |
+| **`kernel/trap.c`** | Implemented signal handling logic |
+| **`user/user.h`** | Added user-level function declaration |
+| **`user/usys.pl`** | Added syscall entry |
+| **`user/test_signal.c`** | Test Program |
+| **`Makefile`** | Added test program to build |
+
+### Kernel Implementation
+
+1. **Signal Fields and ksignal() declaration**
+   
+   **`kernel/proc.h`**
+
+   ```
+   int signal_pending; // indicates if a signal is pending
+   int signal_type; // stores signal type
+   ```
+
+   ```
+   int ksignal(int pid, int type);
+   ```
+
+2. **Core Function**
+
+   **`kernel/proc.c`**
+
+   ```
+   // send signal to a process
+   int ksignal(int pid, int type) {
+   struct proc *p;
+   for(p = proc; p < &proc[NPROC]; p++){
+   acquire(&p->lock);
+   if(p->pid == pid){
+   p->signal_pending = 1;
+   p->signal_type = type;
+   if(p->state == SLEEPING)
+   p->state = RUNNABLE;
+   release(&p->lock);
+   return 0;
+   }
+   release(&p->lock);
+    }
+    return -1;
+    }
+   ```
+
+3. **Syscall Handler**
+
+   **`kernel/sysproc.c`**
+
+   ```
+   uint64 sys_signal(void) {
+   int pid, type;
+   argint(0, &pid);
+   argint(1, &type);
+   return ksignal(pid, type);
+   }
+   ```
+
+4. **Syscall Registration**
+
+   **`kernel/syscall.c`**
+
+   ```
+   extern uint64 sys_signal(void);
+
+   ```
+   ```
+   [SYS_signal] sys_signal,
+
+   ```
+
+5. **Signal Handling**
+
+   **`kernel/trap.c`**
+
+   ```
+   struct proc *p = myproc();
+
+   if(p && p->signal_pending){
+
+    if(p->signal_type == 9){
+    printf("Process %d killed by signal\n", p->pid);
+    p->signal_pending = 0;
+    exit(-1);
+    }
+
+    if(p->signal_type == 10){
+    printf("Process %d paused\n", p->pid);
+
+    while(p->signal_type != 12){
+      yield();
+    }
+
+    p->signal_pending = 0;
+    }
+
+    if(p->signal_type == 12){
+    printf("Process %d resumed\n", p->pid);
+    p->signal_pending = 0;
+    }
+    }
+   ```
+
+### User level Integration
+
+1. **Declaration**
+
+   **`user/user.h`**
+   ```
+   int signal(int pid, int type);
+
+   ```
+
+2. **Entry**
+
+   **`user/usys.pl`**
+
+   ```
+   entry("signal");
+   ```
+
+3. **Test program**
+
+   **`user/test_signal.c`**
+
+   ```c
+   #include "kernel/types.h"
+   #include "user/user.h"
+
+   int
+   main(void)
+   {
+   int pid = fork();
+
+   if(pid == 0){
+    // Child process → runs continuously
+    while(1){
+      printf("Child running...\n");
+      
+      // small delay to avoid flooding output
+      for(volatile int i = 0; i < 10000000; i++);
+    }
+   } else {
+    // Parent process
+
+    // Delay before sending first signal
+    for(volatile int i = 0; i < 300000000; i++);
+
+    printf("Parent: sending PAUSE signal\n");
+    signal(pid, 10);   // pause
+
+    // Delay
+    for(volatile int i = 0; i < 300000000; i++);
+
+    printf("Parent: sending RESUME signal\n");
+    signal(pid, 12);   // resume
+
+    // Delay
+    for(volatile int i = 0; i < 300000000; i++);
+
+    printf("Parent: sending KILL signal\n");
+    signal(pid, 9);    // kill
+
+    wait(0);
+   }
+
+   exit(0);
+   }
+
+   ```
+
+### How to run
+
+```
+$ test_signal
+```
+
+### Output
+
+```   
+Process 5 paused
+Process 5 resumed
+Process 5 killed by signal
+```
+
+
+### Execution flow
+
+```
+User Program (test_signal)
+        │
+        │  signal(pid, type)
+        ↓
+user/usys.S (generated)
+        │  load syscall number
+        │  ecall
+        ↓
+kernel/trap.c → syscall()
+        │
+        ↓
+kernel/sysproc.c → sys_signal()
+        │
+        ↓
+kernel/proc.c → ksignal()
+        │  update process struct
+        ↓
+kernel/trap.c → usertrap()
+        │  detect signal
+        │  execute action
+        ↓
+Process state changes
+
+```
+
+### Key concepts :
+
+-Signals are stored in struct proc
+-Execution is handled in usertrap()
+-Signals act when process returns to user mode
+-Demonstrates asynchronous process control
+
+
+### Conclusion
+
+This implementation enhances xv6 by introducing basic signal handling, allowing processes to communicate and control each other. It simulates real OS behavior and improves understanding of kernel-user interaction and interrupt handling.
+
+---
+
+
+
+### Allocated Syscall Numbers
+| Member | Name | Num |
+|--------|------|-----|
+| 1 (Jitendra) | `getprocinfo` | 22 |
+| 1 (Jitendra) | `shmget` | 23 |
+| 1 (Jitendra) | `shmattach` | 24 |
+| 1 (Jitendra) | `shmdetach` | 25 |
+| 2 (MD.salman) | `fork_with_priority` | **26** |
+| 3 (Neelamber) | `getpinfo` | **27** |
+| 4 (Nithya) | `kill` | **6** |
+| 4 (Nithya) | `Signal` | **29** |
+| **Member 6** | your syscall | **30** |
+
 ## References
 
 - [xv6 Book (RISC-V) — MIT PDOS](https://pdos.csail.mit.edu/6.828/2023/xv6/book-riscv-rev3.pdf)
