@@ -1397,7 +1397,7 @@ This system call demonstrates:
 
 **`kernel/syscall.h`**
 
-```
+```c
 #define SYS_signal 29
 ```
 
@@ -1422,12 +1422,12 @@ This system call demonstrates:
    
    **`kernel/proc.h`**
 
-   ```
+   ```c
    int signal_pending; // indicates if a signal is pending
    int signal_type; // stores signal type
    ```
 
-   ```
+   ```c
    int ksignal(int pid, int type);
    ```
 
@@ -1435,7 +1435,7 @@ This system call demonstrates:
 
    **`kernel/proc.c`**
 
-   ```
+   ```c
    // send signal to a process
    int ksignal(int pid, int type) {
    struct proc *p;
@@ -1459,7 +1459,7 @@ This system call demonstrates:
 
    **`kernel/sysproc.c`**
 
-   ```
+   ```c
    uint64 sys_signal(void) {
    int pid, type;
    argint(0, &pid);
@@ -1472,11 +1472,11 @@ This system call demonstrates:
 
    **`kernel/syscall.c`**
 
-   ```
+   ```c
    extern uint64 sys_signal(void);
 
    ```
-   ```
+   ```c
    [SYS_signal] sys_signal,
 
    ```
@@ -1485,7 +1485,7 @@ This system call demonstrates:
 
    **`kernel/trap.c`**
 
-   ```
+   ```c
    struct proc *p = myproc();
 
    if(p && p->signal_pending){
@@ -1518,7 +1518,7 @@ This system call demonstrates:
 1. **Declaration**
 
    **`user/user.h`**
-   ```
+   ```c
    int signal(int pid, int type);
 
    ```
@@ -1527,7 +1527,7 @@ This system call demonstrates:
 
    **`user/usys.pl`**
 
-   ```
+   ```c
    entry("signal");
    ```
 
