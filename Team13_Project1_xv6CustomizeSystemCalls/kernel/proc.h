@@ -89,6 +89,8 @@ struct proc {
   enum procstate state;        // Process state
   void *chan;                  // If non-zero, sleeping on chan
   int killed;                  // If non-zero, have been killed
+  int signal_pending;           // whether signal exists or not
+  int signal_type;              // which signal
   int xstate;                  // Exit status to be returned to parent's wait
   int pid;                     // Process ID
   int priority ;

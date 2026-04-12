@@ -77,6 +77,18 @@ usertrap(void)
     setkilled(p);
   }
 
+// handle signal
+if(p && p->signal_pending){
+if(p->signal_type == 9){
+printf("Process %d killed by signal \n",p->pid);
+p->signal_pending = 0;
+
+kexit(-1);
+
+}
+}
+
+
   if(killed(p))
     kexit(-1);
 

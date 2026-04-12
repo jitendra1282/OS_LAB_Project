@@ -124,6 +124,8 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
+p->signal_pending = 0;
+p->signal_type = 0;
   p->priority = 60;
   p->ticks = 0;
   p->trace_mask = 0;
@@ -603,6 +605,8 @@ kkill(int pid)
   for(p = proc; p < &proc[NPROC]; p++){
     acquire(&p->lock);
     if(p->pid == pid){
+p->signal_pending = 1;          // signal exists
+p->signal_type = 9;             //signal 9= kill
       p->killed = 1;
       if(p->state == SLEEPING){
         // Wake process from sleep().
