@@ -1589,9 +1589,16 @@ $ test_signal
 
 ### Output
 
-```   
+```
+child running...
+parent: sending PAUSE signal
 Process 5 paused
+parent: sending RESUME signal
 Process 5 resumed
+child running...
+child running...
+child running...
+parent: sending KILL signal
 Process 5 killed by signal
 ```
 
@@ -1626,10 +1633,10 @@ Process state changes
 
 ### Key concepts :
 
--Signals are stored in struct proc
--Execution is handled in usertrap()
--Signals act when process returns to user mode
--Demonstrates asynchronous process control
+- Signals are stored in struct proc
+- Execution is handled in usertrap()
+- Signals act when process returns to user mode
+- Demonstrates asynchronous process control
 
 
 ### Conclusion
