@@ -96,6 +96,23 @@ sys_kill(void)
   return kkill(pid);
 }
 
+// sys_signal - system call handler for signal(pid, type)
+// gets arguments from user and calls ksignal()
+
+uint64
+sys_signal(void)
+{
+  int pid, type;
+
+  // get arguments from user space
+  argint(0, &pid);   // first argument → pid
+  argint(1, &type);  // second argument → signal type
+
+  // call kernel function
+  return ksignal(pid, type);
+}
+
+
 // return how many clock tick interrupts have occurred
 // since start.
 uint64

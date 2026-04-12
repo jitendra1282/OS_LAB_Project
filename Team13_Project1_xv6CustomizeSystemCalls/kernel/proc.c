@@ -620,6 +620,46 @@ p->signal_type = 9;             //signal 9= kill
   return -1;
 }
 
+// ksignal - send a signal to a process identified by pid
+// pid  → process id
+// type → signal type (9 = kill, 10 = pause, 12 = resume)
+
+int
+ksignal(int pid, int type)
+{
+  struct proc *p;
+
+  // loop through all processes in process table
+  for(p = proc; p < &proc[NPROC]; p++){
+
+    acquire(&p->lock);   // lock the process before accessing/modifying
+
+    // check if this is the target process
+    if(p->pid == pid){
+
+      // mark that a signal is pending
+      p->signal_pending = 1;
+
+      // store the type of signal (kill/pause/resume)
+      p->signal_type = type;
+
+      // if process is sleeping, wake it up so it can handle signal
+      if(p->state == SLEEPING)
+        p->state = RUNNABLE;
+
+      release(&p->lock);  // release lock after modification
+
+      return 0;           // success
+    }
+
+    release(&p->lock);    // release lock if not matched
+  }
+
+  // if no process found with given pid
+  return -1;
+}
+
+
 void
 setkilled(struct proc *p)
 {

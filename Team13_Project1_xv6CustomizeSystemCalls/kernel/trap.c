@@ -79,11 +79,27 @@ usertrap(void)
 
 // handle signal
 if(p && p->signal_pending){
+
+if(p->signal_type == 10){
+printf("Process %d paused\n",p->pid);
+while(p->signal_type != 12){
+yield();
+}
+p->signal_pending = 0;
+}
+
+if(p->signal_type == 12){
+printf("Process %d resumed\n",p->pid);
+p->signal_pending = 0;
+
+}
+
 if(p->signal_type == 9){
 printf("Process %d killed by signal \n",p->pid);
 p->signal_pending = 0;
 
 kexit(-1);
+
 
 }
 }

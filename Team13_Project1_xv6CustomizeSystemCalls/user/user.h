@@ -11,6 +11,7 @@ int write(int, const void*, int);
 int read(int, void*, int);
 int close(int);
 int kill(int);
+int signal(int pid, int type);
 int exec(const char*, char**);
 int open(const char*, int);
 int mknod(const char*, short, short);

@@ -151,6 +151,7 @@ UPROGS=\
 	$U/_test_pinfo\
 	$U/_test_priority\
         $U/_test_kill\
+        $U/_test_signal\
 	$U/_trace
 
 fs.img: mkfs/mkfs README $(UPROGS)

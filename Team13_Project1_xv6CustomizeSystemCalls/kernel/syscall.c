@@ -108,6 +108,7 @@ extern uint64 sys_shmdetach(void);
 extern uint64 sys_fork_with_priority(void);
 extern uint64 sys_getpinfo(void);
 extern uint64 sys_trace(void); // custom function for trace syscall by 24je0663
+extern uint64 sys_signal(void); // declaration of  new signal system call handler
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -139,7 +140,8 @@ static uint64 (*syscalls[])(void) = {
 [SYS_shmdetach] sys_shmdetach,
 [SYS_fork_with_priority] sys_fork_with_priority,
 [SYS_getpinfo]  sys_getpinfo,
-[SYS_trace]     sys_trace,
+[SYS_trace]     sys_trace, 
+[SYS_signal]    sys_signal,    //mapss syscall number to sys_signal handler
 };
 
 // Array of syscall names for tracing output
