@@ -1028,15 +1028,6 @@ Module 5 demonstrates:
 | 5 | Demo Driver | `main.c` | 5-phase concurrent test harness |
 | 6 | Compression/Decompression | `compress.h`,`compress.c` | Compression shrinks data, Decompression restores it |
 | 7 | Signals | ` signals.c`, `signals.h` | OS messages to control process |
-## Development Order (Modules Built)
-
-| Order | Module | Files | Key Concept |
-|-------|--------|-------|-------------|
-| 1 | Logger | `logger.c`, `logger.h` | `pthread_mutex_t` — thread-safe file writes |
-| 2 | Thread Pool | `thread_pool.c`, `thread_pool.h` | `pthread_mutex_t` + `pthread_cond_t` — task queue |
-| 3 | Global RWLock | `rwlock_manager.c`, `rwlock_manager.h` | `pthread_rwlock_t` — coarse-grained locking |
-| 4 | Core Read/Write | `file_rw.c`, `file_rw.h` | Per-file `pthread_rwlock_t` — fine-grained locking |
-| 5 | Demo Driver | `main.c` | 5-phase concurrent test harness |
 
 ---
 
