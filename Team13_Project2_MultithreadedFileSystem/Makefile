@@ -11,6 +11,7 @@ SRCS = thread_pool.c \
        file_meta.c \
        compress.c \
        signals.c \
+       cli.c \
        main.c
 
 OBJS   = $(SRCS:.c=.o)
