@@ -1580,6 +1580,10 @@ This system call demonstrates:
    }
 
    ```
+### Makefile
+```c
+$U/_test_signal\
+```
 
 ### How to run
 
