@@ -701,6 +701,333 @@ SYSTEM: Thread pool (6 workers) ready.
 
 ---
 
+## Module 5 — Compression & Signal Handling (**`compress.c`**, **`signals.c`**)
+
+### Purpose
+This module extends the multithreaded file system by adding:
+
+1. File Compression & Decompression
+    Uses zlib for efficient storage.
+    Supports background execution using thread pool.
+2. Signal Handling
+    Handles system signals (SIGINT, SIGUSR1).
+    Enables graceful shutdown and runtime monitoring.
+3. User-Controlled Execution
+    Allows user to choose:
+     - Compress
+     - Decompress
+     - Both
+     - Do nothing
+  
+### Files
+
+| File | Purpose |
+| ------ | ---------- |
+| **`compress.h`**| Declares compression and Decompression API's |
+| **`compress.c`**| Implements compression using zlib |
+| **`signals.h`** | Declares signal handlers |
+| **`signals.c`** | Implements signal handling logic |
+| **`cli.c`** | Modified to integrate Compression |
+| **`main.c`** | initialize setup_signals |
+
+
+### Key Design
+
+1. **Compression**
+  - Uses gzopen() and gzwrite() (zlib)
+  - Reads file in chunks (CHUNK = 16384)
+  - Writes compressed output → compressed.gz
+
+2. **Decompression**
+  - Uses gzread() to restore file
+  - Writes output → decompressed.txt
+  - Only .gz files allowed
+
+3. **Signal Handling**
+  - SIGINT → graceful exit (Ctrl + C)
+  - SIGUSR1 → system status logging
+
+4. **Thread Pool Integration**
+   
+   Tasks executed asynchronously:
+
+   ```
+   thread_pool_submit(pool, compress_task, filename);
+   thread_pool_submit(pool, decompress_task, filename);
+   
+   ```
+
+### API's used
+
+
+| API | Purpose |
+| ------- | ---------- |
+| gzopen() | open compressed file |
+| gzwrite() | write compressed data |
+| gzread() | read compressed data |
+| signal() | register signal handlers |
+| pthread | asynchronous execution |
+
+
+### Implementation
+
+1. **`compress.h`**
+   
+```c
+#ifndef COMPRESS_H
+#define COMPRESS_H
+
+int compress_file(const char *src, const char *dest);
+int decompress_file(const char *src, const char *dest);
+
+#endif
+```
+
+2. **`compress.c`**
+
+```c
+#include <zlib.h>
+#include <stdio.h>
+
+int compress_file(const char *src, const char *dest) {
+    FILE *f_in = fopen(src, "rb");
+    gzFile f_out = gzopen(dest, "wb");
+    
+    if (!f_in || !f_out) return -1;
+
+    char buffer[1024];
+    int bytes;
+    while ((bytes = fread(buffer, 1, sizeof(buffer), f_in)) > 0) {
+        gzwrite(f_out, buffer, bytes);
+    }
+
+    fclose(f_in);
+    gzclose(f_out);
+    return 0;
+}
+
+int decompress_file(const char *src, const char *dest) {
+    gzFile f_in = gzopen(src, "rb");
+    FILE *f_out = fopen(dest, "wb");
+    
+    if (!f_in || !f_out) return -1;
+
+    char buffer[1024];
+    int bytes;
+    while ((bytes = gzread(f_in, buffer, sizeof(buffer))) > 0) {
+        fwrite(buffer, 1, bytes, f_out);
+    }
+
+    gzclose(f_in);
+    fclose(f_out);
+    return 0;
+}
+ 
+```
+
+3. **`signal.h`**
+
+```c
+     #ifndef SIGNALS_H
+#define SIGNALS_H
+
+void setup_signals(void);
+
+#endif
+```
+ 
+4. **`signals.c`**
+
+```c
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+void handle_sigint(int sig) {
+    printf("\n[Signal] Graceful shutdown initiated...\n");
+    exit(0);
+}
+
+void handle_sigusr1(int sig) {
+    printf("\n[Status] System is idle/processing...\n");
+}
+
+void setup_signals(void) {
+    signal(SIGINT, handle_sigint);
+    signal(SIGUSR1, handle_sigusr1);
+}
+
+```
+
+5. Integration in **`cli.c`**
+
+```c
+ static void cli_compress_file(void)
+{
+    printf(ANSI_COLOR_MAGENTA "\n--- Compress File ---\n" ANSI_COLOR_RESET);
+
+    char *source = cli_get_filepath("Enter source file path: ");
+    if (!source) {
+        return;
+    }
+
+    int val = cli_validate_file(source);
+    if (val != CLI_SUCCESS) {
+        free(source);
+        return;
+    }
+
+    char *dest = cli_get_filepath("Enter destination path: ");
+    if (!dest) {
+        free(source);
+        return;
+    }
+
+    printf(ANSI_COLOR_YELLOW "Compressing '%s' to '%s'...\n" ANSI_COLOR_RESET, source, dest);
+    if (compress_file(source, dest) == 0) {
+        printf(ANSI_COLOR_GREEN "✓ File compressed successfully\n" ANSI_COLOR_RESET);
+        log_operation("CLI: Compressed '%s' to '%s'", source, dest);
+    } else {
+        printf(ANSI_COLOR_RED "✗ Compression failed\n" ANSI_COLOR_RESET);
+        log_operation("CLI: Compression failed for '%s'", source);
+    }
+
+    free(source);
+    free(dest);
+}
+```
+
+6. Initialization in **`main.c`**
+
+```c
+          setup_signals();
+``` 
+  
+### How to run and output 
+
+1. **compile the project**
+    
+Go to project folder :
+  ```
+  cd ~/OS_LAB_Project/Team13_Project2_MultithreadedFileSystem
+
+  ```
+compile : 
+```
+make clean
+make
+```
+
+2. **Run the program**
+
+```
+./fs_sim
+```
+
+3. **You will see menu**
+
+```
+Available operations:
+1. Delete File
+2. View Metadata
+3. Rename File
+4. Compress File
+5. Exit
+choice:
+
+```
+If you choose choice: 4 then file needed to compress so it will ask for file path
+```
+--- compress file ---
+Enter source file path:  //path of file........
+
+```
+output:
+
+```
+compressing '...//path of file.....'
+File compressed succesfully
+```
+
+5. **Test Signals**
+
+  Run program:
+   ```
+   ./fs_sim
+   ```
+
+  get pid:
+   ```
+   ps auz | grep fs_sim  //user 12345 ./fs_sim
+   ```
+
+- send SIGUSR1
+
+   ```
+   kill -SIGUSR1 12345
+   ```
+  output:
+   ```
+   [Status] System is Idle/Processing...
+   ```
+- Send SIGINT
+
+   ```
+     press Ctrl + C
+   ```
+
+  output:
+   ```
+   [Signal] Graceful shutdown initiated...
+   ```
+
+   
+### Generated Files
+
+| Operation | File |
+| --- | ---- |
+| Compress | **`compressed.gz`** |
+| Decompress | **`decompressed.txt`** |
+
+### Error Handling
+
+| case | result |
+| ---- | ----- |
+| Invalid File | Error logged |
+| Wrong Format | Rejected |
+| File Missing | Safe Exit |
+
+
+### Observations
+
+  - Compression runs in background
+  - Main thread not blocked
+  - Logs capture full execution
+  - Signals handled independently
+
+### Conclusion 
+
+Module 5 demonstrates:
+
+  - Real-world file compression
+  - Multithreading integration
+  - OS signal handling
+  - User-driven execution
+
+
+---
+
+## Development Order (Modules Built)
+
+| Order | Module | Files | Key Concept |
+|-------|--------|-------|-------------|
+| 1 | Logger | `logger.c`, `logger.h` | `pthread_mutex_t` — thread-safe file writes |
+| 2 | Thread Pool | `thread_pool.c`, `thread_pool.h` | `pthread_mutex_t` + `pthread_cond_t` — task queue |
+| 3 | Global RWLock | `rwlock_manager.c`, `rwlock_manager.h` | `pthread_rwlock_t` — coarse-grained locking |
+| 4 | Core Read/Write | `file_rw.c`, `file_rw.h` | Per-file `pthread_rwlock_t` — fine-grained locking |
+| 5 | Demo Driver | `main.c` | 5-phase concurrent test harness |
+| 6 | Compression/Decompression | `compress.h`,`compress.c` | Compression shrinks data, Decompression restores it |
+| 7 | Signals | ` signals.c`, `signals.h` | OS messages to control process |
 ## Development Order (Modules Built)
 
 | Order | Module | Files | Key Concept |
