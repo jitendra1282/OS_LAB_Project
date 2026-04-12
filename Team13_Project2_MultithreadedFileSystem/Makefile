@@ -1,6 +1,6 @@
 CC      = gcc
 CFLAGS  = -Wall -Wextra -pthread -g -O2
-LDFLAGS = -pthread
+LDFLAGS = -pthread -lz
 
 # All source files in the project
 SRCS = thread_pool.c \
@@ -9,6 +9,8 @@ SRCS = thread_pool.c \
        file_rw.c \
        file_ops.c \
        file_meta.c \
+       compress.c \
+       signals.c \
        main.c
 
 OBJS   = $(SRCS:.c=.o)
@@ -44,4 +46,4 @@ run: all
 
 # Clean build artifacts and generated files
 clean:
-	rm -f $(OBJS) $(TARGET) $(DEPFILES) ops.log test_shared.txt test_renamed.txt
+	rm -f $(OBJS) $(TARGET) $(DEPFILES) ops.log test_shared.txt test_renamed.txt test_copied.txt test_copied.txt.zlib test_shared.txt.zlib test_decompressed.txt

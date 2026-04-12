@@ -24,6 +24,11 @@
  *   PHASE 5 — METADATA DISPLAY AND FILE COPY
  *     Demonstrates metadata display and threaded file copying.
  *
+ *   PHASE 6 — COMPRESSION & SIGNAL HANDLING (Member 5)
+ *     Compress/decompress files using zlib deflate/inflate API.
+ *     Handle SIGINT (Ctrl+C) for graceful shutdown.
+ *     Handle SIGUSR1 to print operation status from ops.log.
+ *
  * All activity is logged to ops.log with timestamps.
  */
 
@@ -37,6 +42,8 @@
 #include "logger.h"
 #include "thread_pool.h"
 #include "file_meta.h"
+#include "compress.h"
+#include "signals.h"
 
 /* ── shared state ───────────────────────────────────────────── */
 #define TEST_FILE   "test_shared.txt"
@@ -91,6 +98,54 @@ static void task_write(void *arg)
     free(w);
 }
 
+/* ── compression task argument struct ───────────────────────– */
+typedef struct {
+    int  thread_id;
+    int  operation;  /* 0 = compress, 1 = decompress */
+    char source[256];
+    char dest[256];
+} compress_arg_t;
+
+/* Compression task: compress or decompress a file */
+static void task_compress(void *arg)
+{
+    compress_arg_t *c = (compress_arg_t *)arg;
+    int ret;
+
+    if (c->operation == 0) {
+        /* Compress */
+        ret = compress_file(c->source, c->dest, c->thread_id);
+    } else {
+        /* Decompress */
+        ret = decompress_file(c->source, c->dest, c->thread_id);
+    }
+
+    if (ret == 0) {
+        log_operation("[Thread-%d] %s completed successfully",
+                      c->thread_id,
+                      c->operation == 0 ? "COMPRESS" : "DECOMPRESS");
+    } else {
+        log_operation("[Thread-%d] %s FAILED",
+                      c->thread_id,
+                      c->operation == 0 ? "COMPRESS" : "DECOMPRESS");
+    }
+    free(c);
+}
+
+/* ── helper: submit compression task ────────────────────────– */
+static void submit_compress(thread_pool_t *pool, int tid,
+                            const char *src, const char *dst, int operation)
+{
+    compress_arg_t *a = malloc(sizeof(compress_arg_t));
+    a->thread_id = tid;
+    a->operation = operation;
+    strncpy(a->source, src, sizeof(a->source) - 1);
+    a->source[sizeof(a->source) - 1] = '\0';
+    strncpy(a->dest, dst, sizeof(a->dest) - 1);
+    a->dest[sizeof(a->dest) - 1] = '\0';
+    thread_pool_submit(pool, task_compress, a);
+}
+
 /* ── helper: submit a reader ────────────────────────────────── */
 static void submit_reader(thread_pool_t *pool, int tid, int fid, int sleep_ms)
 {
@@ -118,6 +173,7 @@ int main(void)
     printf("╔══════════════════════════════════════════════════╗\n");
     printf("║  Multithreaded File Management System            ║\n");
     printf("║  Core Module: file_rw.c (Read/Write with rwlock) ║\n");
+    printf("║  + Member 5: Compression & Signal Handling       ║\n");
     printf("╚══════════════════════════════════════════════════╝\n\n");
 
     /* ── Initialise subsystems ─────────────────────────────── */
@@ -126,6 +182,12 @@ int main(void)
         return 1;
     }
     log_operation("====== SYSTEM START ======");
+
+    /* Initialize signal handlers EARLY (before any threads) */
+    if (signals_init() != 0) {
+        fprintf(stderr, "ERROR: signals_init failed\n");
+        return 1;
+    }
 
     if (file_rw_init() != 0) {
         fprintf(stderr, "ERROR: file_rw_init failed\n");
@@ -249,15 +311,59 @@ int main(void)
     sleep(1);
     printf("    File copy task submitted to thread pool.\n");
 
+    /* ════════════════════════════════════════════════════════
+     * PHASE 7 — COMPRESSION & DECOMPRESSION (Member 5)
+     * Demonstrates zlib deflate/inflate API in thread pool.
+     * ════════════════════════════════════════════════════════ */
+    printf("\n─── PHASE 7: Compression & Decompression (Member 5) ─\n");
+    log_operation("====== PHASE 7: Compression & Decompression ======");
+
+    printf("    Compressing test_shared.txt to test_shared.txt.zlib\n");
+    submit_compress(pool, 301, TEST_FILE, "test_shared.txt.zlib", 0);
+
+    printf("    Compressing test_copied.txt to test_copied.txt.zlib\n");
+    submit_compress(pool, 302, "test_copied.txt", "test_copied.txt.zlib", 0);
+
+    sleep(1);   /* let compression tasks complete */
+
+    printf("    Decompressing test_shared.txt.zlib to test_decompressed.txt\n");
+    submit_compress(pool, 303, "test_shared.txt.zlib", "test_decompressed.txt", 1);
+
+    sleep(1);   /* let decompression complete */
+
+    printf("    Compression phase complete. Check ops.log for details.\n\n");
+
+    /* ════════════════════════════════════════════════════════
+     * SIGNAL HANDLING DEMO
+     * The program now has signal handlers active. Users can:
+     *   - Press Ctrl+C to request graceful shutdown (SIGINT)
+     *   - Run `kill -USR1 <pid>` in another terminal for status (SIGUSR1)
+     * ════════════════════════════════════════════════════════ */
+    printf("─── Signal Handlers Active ──────────────────────────\n");
+    printf("  • Press Ctrl+C to gracefully shutdown\n");
+    printf("  • In another terminal: kill -USR1 %d for status\n\n", getpid());
+
+    fprintf(stderr, "\n[Ready for signals... Press Ctrl+C when done, or send signals]\n\n");
+
     /* ── Shutdown ───────────────────────────────────────────── */
     thread_pool_shutdown(pool);
 
     file_rw_destroy();
     log_operation("====== SYSTEM STOP ======");
+
+    /* Print compression statistics */
+    char *stats = compress_get_stats();
+    if (stats) {
+        log_operation("%s", stats);
+        fprintf(stderr, "\n%s\n", stats);
+        free(stats);
+    }
+
     logger_close();
 
     printf("╔══════════════════════════════════════════════════╗\n");
     printf("║  All phases complete. See ops.log for full trace. ║\n");
+    printf("║  Signal handling initialized successfully.       ║\n");
     printf("╚══════════════════════════════════════════════════╝\n");
     return 0;
 }
