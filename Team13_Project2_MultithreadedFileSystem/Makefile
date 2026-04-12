@@ -1,6 +1,6 @@
 CC      = gcc
 CFLAGS  = -Wall -Wextra -pthread -g -O2
-LDFLAGS = -pthread
+LDFLAGS = -pthread -lz
 
 # All source files in the project
 SRCS = thread_pool.c \
@@ -9,6 +9,9 @@ SRCS = thread_pool.c \
        file_rw.c \
        file_ops.c \
        file_meta.c \
+       compress.c \
+       signals.c \
+       cli.c \
        main.c
 
 OBJS   = $(SRCS:.c=.o)
