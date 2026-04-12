@@ -17,4 +17,7 @@ To build and verify the Multithreaded FS Operations, CLI operations, and Logging
 
   <img src="Execution_Screenshots/screenshot5.png" alt="Deletion and Logger Logs" width="600"/>
   <br><i>File Deletion and Final ops.log Trace</i><br><br>
+
+  <img src="Execution_Screenshots/screenshot6.png" alt="Completion and Cleanup" width="600"/>
+  <br><i>Completion and Cleanup Logs</i><br><br>
 </div>
