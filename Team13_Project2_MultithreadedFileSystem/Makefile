@@ -46,4 +46,4 @@ run: all
 
 # Clean build artifacts and generated files
 clean:
-	rm -f $(OBJS) $(TARGET) $(DEPFILES) ops.log test_shared.txt test_renamed.txt test_copied.txt test_copied.txt.zlib test_shared.txt.zlib test_decompressed.txt
+	rm -f $(OBJS) $(TARGET) $(DEPFILES) ops.log test_shared.txt test_renamed.txt
