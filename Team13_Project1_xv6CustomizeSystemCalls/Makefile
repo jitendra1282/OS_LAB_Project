@@ -150,7 +150,8 @@ UPROGS=\
 	$U/_testshm\
 	$U/_test_pinfo\
 	$U/_test_priority\
-	$U/_trace
+	$U/_trace\
+	$U/_tyield
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

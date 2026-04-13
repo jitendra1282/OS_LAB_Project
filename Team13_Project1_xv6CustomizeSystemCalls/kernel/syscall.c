@@ -108,6 +108,7 @@ extern uint64 sys_shmdetach(void);
 extern uint64 sys_fork_with_priority(void);
 extern uint64 sys_getpinfo(void);
 extern uint64 sys_trace(void); // custom function for trace syscall by 24je0663
+extern uint64 sys_thread_yield(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -140,6 +141,7 @@ static uint64 (*syscalls[])(void) = {
 [SYS_fork_with_priority] sys_fork_with_priority,
 [SYS_getpinfo]  sys_getpinfo,
 [SYS_trace]     sys_trace,
+[SYS_thread_yield] sys_thread_yield,
 };
 
 // Array of syscall names for tracing output
@@ -172,6 +174,7 @@ static const char *syscallnames[] = {
 [SYS_fork_with_priority] "fork_with_priority",
 [SYS_getpinfo]  "getpinfo",
 [SYS_trace]     "trace",
+[SYS_thread_yield] "thread_yield",
 };
 
 void

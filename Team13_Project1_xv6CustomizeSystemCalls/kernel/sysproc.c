@@ -164,3 +164,12 @@ sys_trace(void)
   myproc()->trace_mask = mask;
   return 0;
 }
+
+// sys_thread_yield: voluntarily give up the CPU to allow other processes to run
+// No arguments. Returns 0 on success.
+uint64
+sys_thread_yield(void)
+{
+  yield();
+  return 0;
+}

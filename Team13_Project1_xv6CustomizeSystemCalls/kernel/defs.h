@@ -187,5 +187,8 @@ uint64          sys_shmget(void);
 uint64          sys_shmattach(void);
 uint64          sys_shmdetach(void);
 
+// sysproc.c
+uint64          sys_thread_yield(void);
+
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

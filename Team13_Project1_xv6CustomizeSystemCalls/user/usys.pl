@@ -49,3 +49,4 @@ entry("shmdetach");
 entry("fork_with_priority");
 entry("getpinfo");
 entry("trace");
+entry("thread_yield");
