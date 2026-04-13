@@ -30,6 +30,7 @@ void* shmattach(int);
 int shmdetach(int);
 int fork_with_priority(int);
 int trace(int);
+int thread_yield(void);
 
 struct pstat;
 int getpinfo(struct pstat*);

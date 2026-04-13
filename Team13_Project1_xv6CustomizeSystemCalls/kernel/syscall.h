@@ -27,3 +27,4 @@
 #define SYS_fork_with_priority 26
 #define SYS_getpinfo    27
 #define SYS_trace       28
+#define SYS_thread_yield 29
