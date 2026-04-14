@@ -24,7 +24,7 @@ This project implements a **multithreaded file management system** in C using PO
 |---|--------|------|-------------|----------|
 | 1 | **Mohammad Salman** | Core Architecture, Thread Pool & Synchronization | `main.c`, `thread_pool.c`, `rwlock_manager.c`, `Makefile` | Thread pool execution engine, System initialization, Global read-write lock management |
 | 2 | **Nandipati Jitendra** | File I/O & Core Read/Write | `file_rw.c`, `file_ops.c` | Core concurrent read and exclusive write mechanisms, Rename and Delete execution logic |
-| 3 | **Nilambhar** | CLI & Interactive Menu | `cli.c`, `cli.h` | Setup interactive terminal GUI, Handle user selections, Validations |
+| 3 | **Neelamber** | CLI & Interactive Menu | `cli.c`, `cli.h` | Setup interactive terminal GUI, Handle user selections, Validations |
 | 4 | **Narayan Chauhan** | File Metadata retrieval | `file_meta.c`, `file_meta.h` | Querying POSIX `stat()` to retrieve file sizes, permissions, logic handling for `View Metadata` |
 | 5 | **Nithya**| Error Handling & Logging | `logger.c`, `logger.h` | Thread-safe logging, Error tracebacks printed to `ops.log` |
 | 6 | **Muskan Bhibuthy** | Compression & Signal Handling | `compress.c`, `signals.c` | Executing zlib/gzip compression algorithms, trapping `SIGINT` |
@@ -48,7 +48,7 @@ This project implements a **multithreaded file management system** in C using PO
 - **`file_rw.c`** — Implements fine-grained `pthread_rwlock_t` locking ensuring that multiple readers can retrieve contents simultaneously, but writers maintain absolute exclusivity. 
 - **`file_ops.c`** — Ties locks to standard C File I/O abstractions (such as renaming or deleting). Provides wrappers like `delete_file` and `rename_file` that immediately interface with `rwlock_manager()`.
 
-### Member 3 — Nilambhar (CLI & Interactive Menu)
+### Member 3 — Neelamber (CLI & Interactive Menu)
 
 **Files**: `cli.c`, `cli.h`
 
