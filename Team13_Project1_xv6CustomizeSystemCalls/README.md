@@ -1661,8 +1661,8 @@ This implementation enhances xv6 by introducing basic signal handling, allowing 
 | 2 (MD.salman) | `fork_with_priority` | **26** |
 | 3 (Neelamber) | `getpinfo` | **27** |
 | 4 (Nithya) | `kill` | **6** |
-| 4 (Nithya) | `Signal` | **29** |
-| **Member 6** | your syscall | **30** |
+| 4 (Nithya) | `Signal` | **30** |
+| **Member 6** | your syscall | **31** |
 
 ## References
 
