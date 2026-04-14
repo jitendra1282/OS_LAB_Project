@@ -152,7 +152,8 @@ UPROGS=\
 	$U/_test_priority\
         $U/_test_kill\
         $U/_test_signal\
-	$U/_trace
+	$U/_trace\
+	$U/_sleeptest
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)

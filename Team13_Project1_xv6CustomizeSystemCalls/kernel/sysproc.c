@@ -181,3 +181,33 @@ sys_trace(void)
   myproc()->trace_mask = mask;
   return 0;
 }
+
+
+uint64
+sys_sleep(void)
+{
+  int n;
+  uint ticks0;
+
+  if(argint(0, &n) < 0)
+    return -1;
+
+  printf("Process %d is going to sleep for %d ticks\n", myproc()->pid, n);
+
+  acquire(&tickslock);
+  ticks0 = ticks;
+
+  while(ticks - ticks0 < n){
+    if(killed(myproc())){
+      release(&tickslock);
+      return -1;
+    }
+    sleep(&ticks, &tickslock);
+  }
+
+  release(&tickslock);
+
+  printf("Process %d woke up\n", myproc()->pid);
+
+  return 0;
+}
