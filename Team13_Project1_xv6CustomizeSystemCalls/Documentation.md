@@ -26,7 +26,7 @@ This project extends the **xv6 operating system** (RISC-V version) by implementi
 |---|--------|------|------------|-------------|
 | 1 | **Mohammad Salman** | Priority-Based Forking & Process Table Inspection | `fork_with_priority`, `getpinfo` | SYS#26, SYS#27 |
 | 2 | **Nandipati Jitendra** | Process Introspection & Shared Memory IPC | `getprocinfo`, `shmget`, `shmattach`, `shmdetach` | SYS#22, 23, 24, 25 |
-| 3 | **Nilambhar** | Syscall Tracing with Bitmask | `trace` | SYS#28 |
+| 3 | **Neelamber Mishra** | Syscall Tracing with Bitmask | `trace` | SYS#28 |
 | 4 | **Narayan Chauhan** | Cooperative CPU Scheduling | `thread_yield` | SYS#29 |
 | 5 | **Nithya** | Signal-Based Kill | Modified `kill` | SYS#6 |
 | 6 | **Muskan Bhibuthy** | Sleep with Logging | `sleep` (with `sleeplog`) | SYS#30 |
@@ -101,7 +101,7 @@ static struct shmseg shm_table[16];
 
 ---
 
-### Member 3 — Nilambhar (`trace`)
+### Member 3 — Neelamber Mishra (`trace`)
 
 **Files**: `kernel/proc.h`, `kernel/proc.c`, `kernel/syscall.h`, `kernel/syscall.c`, `kernel/sysproc.c`, `user/user.h`, `user/trace.c`
 
@@ -235,7 +235,7 @@ kfree(physical page)                    │
 | 2 — Jitendra | `shmdetach` | Unmap shared segment | 25 |
 | 1 — Salman | `fork_with_priority` | Priority fork | 26 |
 | 1 — Salman | `getpinfo` | Process table snapshot | 27 |
-| 3 — Nilambhar | `trace` | Syscall tracing | 28 |
+| 3 — Neelamber Mishra | `trace` | Syscall tracing | 28 |
 | 4 — Narayan | `thread_yield` | Cooperative yield | 29 |
 | 5 — Nithya | `kill` (modified) | Signal-based kill | 6 |
 | 6 — Muskan | `sleep` (with sleeplog) | Sleep with logging | 30 |
@@ -334,7 +334,7 @@ PID: 12 | State: 4 | Priority: 60 | Ticks: 5
 
 ---
 
-### 5. `trace 32 sh` — Syscall Tracing (Member 3 — Nilambhar, SYS#28)
+### 5. `trace 32 sh` — Syscall Tracing (Member 3 — Neelamber Mishra, SYS#28)
 
 Bitmask `32 = 1<<5` traces the `read` syscall (syscall number 5).
 
@@ -414,7 +414,7 @@ Process 4: Woke up after sleeping for 4 ticks
 ### Syscall 4 — `getpinfo` (Member 1 — Salman)
 ![Syscall4](./Execution_Screenshots/Syscall4.png)
 
-### Syscall 5 — `trace` (Member 3 — Nilambhar)
+### Syscall 5 — `trace` (Member 3 — Neelamber Mishra)
 ![Syscall5](./Execution_Screenshots/Syscall5.png)
 
 ### Syscall 6 — `thread_yield` (Member 4 — Narayan)
