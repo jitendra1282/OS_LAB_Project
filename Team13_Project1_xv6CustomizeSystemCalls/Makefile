@@ -153,6 +153,7 @@ UPROGS=\
         $U/_test_kill\
         $U/_test_signal\
 	$U/_trace\
+        $U/_tyield\
 	$U/_sleeptest
 
 fs.img: mkfs/mkfs README $(UPROGS)
