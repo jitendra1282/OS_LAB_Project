@@ -25,7 +25,7 @@ This project extends the **xv6 operating system** (RISC-V version) by implementi
 | # | Member | Role | Syscall(s) | Syscall No. |
 |---|--------|------|------------|-------------|
 | 1 | **Mohammad Salman** | Priority-Based Forking & Process Table Inspection | `fork_with_priority`, `getpinfo` | SYS#26, SYS#27 |
-| 2 | **Nandipati Jitendra** | Process Introspection & Shared Memory IPC | `getprocinfo`, `shmget`, `shmattach`, `shmdetach` | SYS#22, 23, 24, 25 |
+| 2 | **Nandipati Jitendra** | Process Introspection & Shared Memory IPC | `getprocinfo`| SYS#22, 23, 24, 25 |
 | 3 | **Neelamber Mishra** | Syscall Tracing with Bitmask | `trace` | SYS#28 |
 | 4 | **Narayan Chauhan** | Cooperative CPU Scheduling | `thread_yield` | SYS#29 |
 | 5 | **Nithya** | Signal-Based Kill | Modified `kill` | SYS#6 |
@@ -80,24 +80,8 @@ struct pstat {
 
 ### Member 2 — Nandipati Jitendra (`getprocinfo` + Shared Memory IPC)
 
-**Files**: `kernel/sysproc.c`, `kernel/shm.c`, `kernel/defs.h`, `kernel/main.c`, `kernel/syscall.h`, `kernel/syscall.c`, `user/user.h`, `user/usys.pl`, `user/testproc.c`, `user/testshm.c`, `Makefile`
 
 - **`getprocinfo`** — Reads `struct proc` via `myproc()` and prints process name, PID, and state from kernel space.
-- **`shmget`** — Allocates one physical page (`kalloc()`) and registers it in a global shared memory table (max 16 segments).
-- **`shmattach`** — Maps the shared page into the calling process's virtual address space using `mappages()`.
-- **`shmdetach`** — Removes the mapping using `uvmunmap()`; frees physical page (`kfree`) when `refcount` drops to zero.
-
-**Shared memory table (`kernel/shm.c`):**
-```c
-struct shmseg {
-  struct spinlock lock;
-  int     state;     // SHM_FREE or SHM_USED
-  int     key;       // user-chosen identifier
-  uint64  pa;        // physical address of shared page
-  int     refcount;  // number of processes attached
-};
-static struct shmseg shm_table[16];
-```
 
 ---
 
